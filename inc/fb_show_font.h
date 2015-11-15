@@ -1,14 +1,23 @@
 #include <linux/fb.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+
 
 #define FONTDATAMAX 4096
 #define BYTE_OF_CHAR 16
 
 #define COLOR_BLACK 0 
-#define COLOR_WHITE 0xffffff
-#define COLOR_GREEN 0x00ff00
-#define COLOR_RED   0x0000ff
+#define COLOR_WHITE  0xffffff
+#define COLOR_GREEN  0x00ff00
+#define COLOR_BLUE   0x0000ff
+#define COLOR_RED    0xff0000
+
 
 
 typedef struct lcd_scr{
@@ -26,7 +35,7 @@ typedef struct lcd_scr{
 #define CLR_LCD_FB(fbmem,size) do{memset(fbmem, 0, size);}while(0)	
 extern struct fb_var_screeninfo var;
 extern struct fb_fix_screeninfo fix;
-extern const unsigned char fontdata_8x16[FONTDATAMAX];
+//extern const unsigned char fontdata_8x16[FONTDATAMAX];
 int put_lcd_pxl(struct lcd_scr *lcd_obj ,int x, int y, unsigned int color);
 
 int lcd_put_chinese(struct lcd_scr *lcd_obj, int x, int y, unsigned char *chstr);
