@@ -127,7 +127,7 @@ main( int     argc,
   filename      = argv[1];                           /* first argument     */
   text          = argv[2];                           /* second argument    */
   num_chars     = strlen( text );
-  angle         = ( 0 / 360 ) * 3.14159 * 2;      /* use 25 degrees     */
+  angle = ( 1.0 * strtoul(argv[2], NULL, 0) / 360 ) * 3.14159 * 2;      /* use 25 degrees     */
   target_height = HEIGHT;
 
   error = FT_Init_FreeType( &library );              /* initialize library */
@@ -154,8 +154,8 @@ main( int     argc,
 
   /* the pen position in 26.6 cartesian space coordinates; */
   /* start at (0,40) relative to the upper left corner  */
-  pen.x = 0 * 64;
-  pen.y = ( target_height - 64 ) * 64;
+  pen.x = 400 * 64;
+  pen.y = ( target_height - 240 ) * 64;
 
   for ( n = 0; n < wcslen(chstr); n++ )
   {
