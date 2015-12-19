@@ -170,7 +170,7 @@ int get_tscreen_ev(struct input_ev *pev)
 	ret = ts_read(ts, &samp, 1);
 	if (ret < 0) 
 		return -1;	
-	if(is_out_of_time(&pre_tv, &samp.tv, 1000)){
+	if(is_out_of_time(&pre_tv, &samp.tv, 800)){
 		if((samp.y <= 0) || (samp.y > g_yres))
 			return -1;  /*discard val*/
 		memcpy(&pre_tv, &samp.tv, sizeof(struct timeval));
@@ -222,7 +222,7 @@ static int is_out_of_time(struct timeval *pre_time, struct timeval *now_time, in
 	int pre_ms, now_ms;
 	pre_ms = (pre_time->tv_sec * 1000) + (pre_time->tv_usec / 1000);
 	now_ms = (now_time->tv_sec * 1000) + (now_time->tv_usec / 1000);
-	return (now_ms >= (pre_ms + 500));
+	return (now_ms >= (pre_ms + dtime_ms));
 
 }
 
