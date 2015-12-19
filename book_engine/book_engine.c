@@ -32,7 +32,15 @@
 *					 
 *******************************************************************************/
 
-static char *def_input_ls[] = {"stdin_dev",NULL};
+static char *def_input_ls[] = {
+#ifdef CONFIG_STDIN_DEV
+								"stdin_dev",
+#endif 
+
+#ifdef CONFIG_TSC_DEV
+								"tscreen",							
+#endif 
+								NULL};
 
 /*******************************************************************************
 * @global static func:	   
@@ -276,6 +284,7 @@ static int show_next_pg(struct book_dsc *self)
 	/*2.update current page data and state */
 	if(self->curr_pg && self->curr_pg->next_pg){
 		self->curr_pg = self->curr_pg->next_pg;
+		printf("current page %d\n", self->curr_pg->pg_nr);
 		return 0;
 	}
 	tmp_pg = (struct page_dsc *)malloc(sizeof(struct page_dsc));
@@ -285,6 +294,7 @@ static int show_next_pg(struct book_dsc *self)
 		tmp_pg->next_pg = NULL;
 		tmp_pg->pre_pg= NULL;
 		ret = update_global_pg_list(self,tmp_pg);
+		printf("current page %d\n", self->curr_pg->pg_nr);
 	}
 	else{ 
 		perror("can't alloc head mem!\n");
@@ -319,6 +329,7 @@ static int show_pre_pg(struct book_dsc *self)
 		return -1;
 	}
 	self->curr_pg = self->curr_pg->pre_pg;
+	printf("current page %d\n", self->curr_pg->pg_nr);
 	return 0;
 }
 

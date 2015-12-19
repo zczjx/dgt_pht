@@ -90,6 +90,7 @@ int init_stdin_dev(void)
 	return 0;
 #else
 	struct termios tty_stat;
+	printf("init input dev: %s! \n",stdin_dev.name);
 	tcgetattr(STDIN_FILENO, &tty_stat);
 	tty_stat.c_lflag &= ~ICANON; /*non-canon input model*/
 	tty_stat.c_cc[VMIN] = 1;
@@ -135,7 +136,7 @@ int exit_stdin_dev(void)
 *******************************************************************************/
 int get_stdin_dev_ev(struct input_ev *pev)
 {
-#if	  defined(CONFIG_INPUT_QUERY) || defined(CONFIG_INPUT_SELECT) 
+#if	defined(CONFIG_INPUT_QUERY) || defined(CONFIG_INPUT_SELECT) 
 	struct timeval tm_out;
 	int ret;
 	fd_set stdfd;

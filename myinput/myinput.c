@@ -43,6 +43,7 @@ static struct input_dev *idev_h = NULL;
 #ifdef CONFIG_STDIN_DEV
 extern int load_stdin_dev_md(void);
 #endif 
+
 #ifdef CONFIG_TSC_DEV
 extern int load_tscreen_md(void);
 #endif 
@@ -153,7 +154,8 @@ int get_rt_input_ev(struct input_ev *pev)
 	int ret;
 	struct input_dev *tmp_dev = idev_h;
 	while(tmp_dev){
-		if(0 == tmp_dev->get_input_ev(pev))
+		//printf("use input dev: %s\n",tmp_dev->name);
+		if(tmp_dev->get_input_ev(pev) == 0)
 			return 0;
 		tmp_dev = tmp_dev->next;
 	}
@@ -198,9 +200,9 @@ int enable_input_dev_set(char *dev_ls[])
 				if(ret){
 					printf("can't enable input_dev %s! \n",tmp_dev->name);
 					return -1;
-				}
-					
+				}	
 			}
+			
 		}
 		tmp_dev = tmp_dev->next;
 	}

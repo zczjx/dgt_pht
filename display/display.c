@@ -187,3 +187,28 @@ struct display_dev *get_disp_dev(char *name)
 
 }
 
+
+/*******************************************************************************
+* @function name: get_dis_dev_res    
+*                
+* @brief:          
+*                
+* @param:        
+*                
+*                
+* @return:        
+*                
+* @comment:        
+*******************************************************************************/
+int get_dis_dev_res(const char *dev_name, int *xres, int *yres)
+{
+	struct display_dev *dis_dev = NULL;
+	dis_dev = get_disp_dev(dev_name);
+	if(!dis_dev)
+		return -1;
+	*xres   = (int)dis_dev->attr.xres;
+	*yres   = (int)dis_dev->attr.yres;
+	return 0;
+}
+
+

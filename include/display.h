@@ -52,6 +52,7 @@ extern void print_disp_md_lst(void);
 extern int select_main_scr_dev(char *name); /*fb/crt */
 extern struct display_dev *get_disp_dev(char *name); 
 
+extern int get_dis_dev_res(const char *dev_name, int *xres, int *yres);
 
 
 

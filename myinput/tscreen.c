@@ -18,12 +18,18 @@
 *    
 * @comment           
 *******************************************************************************/
-#include "myinput.h"
 #include "config.h"
+#include "myinput.h"
+#include "display.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
+#include <signal.h>
+#include <sys/fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <sys/time.h>
+#include "tslib.h"
 
 
 
@@ -34,6 +40,8 @@
 static int init_tscreen_dev(void);
 static int exit_tscreen_dev(void);
 static int get_tscreen_ev(struct input_ev *pev);
+static int is_out_of_time(struct timeval *pre_time, struct timeval *now_time,int dtime_ms);
+
 
 
 /*******************************************************************************
@@ -46,6 +54,9 @@ static struct input_dev tscreen = {
 			.exit_dev	= exit_tscreen_dev,
 			.get_input_ev = get_tscreen_ev,
 };
+
+static struct tsdev *ts;
+static char  *tsdevice = NULL;
 
 
 /*******************************************************************************
@@ -78,11 +89,27 @@ int load_tscreen_md(void)
 *                
 * @comment:        
 *******************************************************************************/
+#define _BLK_MD_ 0
+#define _NO_BLK_MD_ 1
+
 int init_tscreen_dev(void)
 {
 #ifdef CONFIG_INPUT_SELECT
 	return 0;
 #else
+	printf("init input dev: %s! \n",tscreen.name);
+	if((tsdevice = getenv("TSLIB_TSDEVICE")) != NULL )
+		ts = ts_open(tsdevice, _BLK_MD_);
+	else 
+		ts = ts_open("/dev/input/event0", _BLK_MD_);
+	if (!ts){
+		perror("ts_open");
+		return -1;
+	   }
+	if (ts_config(ts)) {
+		perror("ts_config");
+		return -1;
+	   }
 	return 0;		
 #endif 
 
@@ -120,12 +147,84 @@ int exit_tscreen_dev(void)
 *******************************************************************************/
 int get_tscreen_ev(struct input_ev *pev)
 {
-#if	  defined(CONFIG_INPUT_QUERY) || defined(CONFIG_INPUT_SELECT) 
+#ifdef CONFIG_TSC_INPUT_CLICK
+#if	defined(CONFIG_INPUT_QUERY) || defined(CONFIG_INPUT_SELECT) 
+	static int get_res_flag = 0;
+	static int g_xres;
+	static int g_yres;
+	static int up_scr = 0;
+	static int down_scr = 0;
+	struct ts_sample samp;
+	int ret;
+	static struct timeval pre_tv;
+	if(!get_res_flag){
+	ret = get_dis_dev_res("fb", &g_xres, &g_yres);
+	printf("xres val is %d\n", g_xres);
+	printf("yres val is %d\n", g_yres);
+	up_scr = g_yres / 3;
+	down_scr = (2 * g_yres) / 3;
+	get_res_flag = 1;
+	}
+
+	//printf("before read tslib\n");
+	ret = ts_read(ts, &samp, 1);
+	if (ret < 0) 
+		return -1;	
+	if(is_out_of_time(&pre_tv, &samp.tv, 1000)){
+		if((samp.y <= 0) || (samp.y > g_yres))
+			return -1;  /*discard val*/
+		memcpy(&pre_tv, &samp.tv, sizeof(struct timeval));
+		memcpy(&pev->time, &samp.tv, sizeof(struct timeval));
+		pev->type = INPUT_TYPE_TSC;
+		//printf("ts y val is %d\n", samp.y);
+		if(samp.y < up_scr)
+			pev->val = INPUT_VAL_UP ;
+		else if(samp.y > down_scr)
+			pev->val = INPUT_VAL_DOWN;
+		else
+			pev->val = INPUT_VAL_UNKNOWN;
 		return 0;
+	}else
+		return -1;
 #elif defined(CONFIG_INPUT_THREAD) || defined(CONFIG_INPUT_SLIP)
 
 #endif 
 
+
+#endif 
+
+#ifdef CONFIG_TSC_INPUT_SLIDE
+#if	defined(CONFIG_INPUT_QUERY) || defined(CONFIG_INPUT_SELECT) 
+
+#elif defined(CONFIG_INPUT_THREAD) || defined(CONFIG_INPUT_SLIP)
+
+#endif 
+
+
+#endif 
+
 }
+
+/*******************************************************************************
+* @function name: is_out_of_time    
+*                
+* @brief:          
+*                
+* @param:        
+*                
+*                
+* @return:        
+*                
+* @comment:        
+*******************************************************************************/
+static int is_out_of_time(struct timeval *pre_time, struct timeval *now_time, int dtime_ms)
+{
+	int pre_ms, now_ms;
+	pre_ms = (pre_time->tv_sec * 1000) + (pre_time->tv_usec / 1000);
+	now_ms = (now_time->tv_sec * 1000) + (now_time->tv_usec / 1000);
+	return (now_ms >= (pre_ms + 500));
+
+}
+
 
 
