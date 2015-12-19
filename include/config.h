@@ -34,8 +34,8 @@
 // #define CONFIG_STDIN_DEV
 #define CONFIG_TSC_DEV
 /*tscreen input method**/
-#define CONFIG_TSC_INPUT_CLICK
-// #define CONFIG_TSC_INPUT_SLIDE
+// #define CONFIG_TSC_INPUT_CLICK
+#define CONFIG_TSC_INPUT_SLIDE
 
 
 

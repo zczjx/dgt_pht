@@ -170,7 +170,7 @@ int get_tscreen_ev(struct input_ev *pev)
 	ret = ts_read(ts, &samp, 1);
 	if (ret < 0) 
 		return -1;	
-	if(is_out_of_time(&pre_tv, &samp.tv, 800)){
+	if(is_out_of_time(&pre_tv, &samp.tv, 500)){
 		if((samp.y <= 0) || (samp.y > g_yres))
 			return -1;  /*discard val*/
 		memcpy(&pre_tv, &samp.tv, sizeof(struct timeval));
@@ -195,7 +195,59 @@ int get_tscreen_ev(struct input_ev *pev)
 
 #ifdef CONFIG_TSC_INPUT_SLIDE
 #if	defined(CONFIG_INPUT_QUERY) || defined(CONFIG_INPUT_SELECT) 
+	int ret;
+	static int get_res_flag = 0;
+	static int g_xres;
+	static int g_yres;
+	static int slide_st = 0;
+	static int r_slide = 0;
+	static int l_slide = 0;
+	static struct ts_sample pre_samp; /*press sample*/
+	static struct ts_sample rls_samp;
+	struct ts_sample samp;
+	int ts_delta;
+	if(!get_res_flag){
+	ret = get_dis_dev_res("fb", &g_xres, &g_yres);
+	printf("xres val is %d\n", g_xres);
+	printf("yres val is %d\n", g_yres);
+	r_slide = g_xres / 5;
+	l_slide = 0 - r_slide;
+	get_res_flag = 1;
+	}
 
+	ret = ts_read(ts, &samp, 1);
+	if (ret < 0) 
+		return -1;	
+	if((samp.x <= 0) || (samp.x > g_xres))
+		return -1;  /*discard val*/
+	
+	if((samp.pressure > 0) && (!slide_st)){
+		/*press on tscreen*/
+		memcpy(&pre_samp, &samp, sizeof(struct ts_sample));
+		slide_st = 1;
+	}
+	if(samp.pressure <= 0){
+		/*release the tscreen*/
+		if(slide_st){
+			slide_st = 0;
+			memcpy(&rls_samp, &samp, sizeof(struct ts_sample));
+			pev->type = INPUT_TYPE_TSC;
+			memcpy(&pev->time, &rls_samp.tv, sizeof(struct timeval));
+			ts_delta = rls_samp.x - pre_samp.x;
+			if(ts_delta > r_slide)
+				/*right slide next page*/
+				pev->val = INPUT_VAL_DOWN;
+			else if(ts_delta < l_slide)
+				pev->val = INPUT_VAL_UP;
+			else
+				pev->val = INPUT_VAL_UNKNOWN;
+			
+			return 0;
+		}else
+			return -1;
+	}
+		
+		return -1;
 #elif defined(CONFIG_INPUT_THREAD) || defined(CONFIG_INPUT_SLIP)
 
 #endif 
