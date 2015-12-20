@@ -87,7 +87,14 @@ int load_stdin_dev_md(void)
 int init_stdin_dev(void)
 {
 #ifdef CONFIG_INPUT_SELECT
-	return 0;
+	struct termios tty_stat;
+	printf("init input dev: %s! \n",stdin_dev.name);
+	tcgetattr(STDIN_FILENO, &tty_stat);
+	tty_stat.c_lflag &= ~ICANON; /*non-canon input model*/
+	tty_stat.c_cc[VMIN] = 1;
+	tcsetattr(STDIN_FILENO, TCSANOW, &tty_stat);
+	stdin_dev.mthd.fd = STDIN_FILENO;
+	return 0;		
 #else
 	struct termios tty_stat;
 	printf("init input dev: %s! \n",stdin_dev.name);

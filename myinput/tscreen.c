@@ -95,13 +95,27 @@ int load_tscreen_md(void)
 int init_tscreen_dev(void)
 {
 #ifdef CONFIG_INPUT_SELECT
+	printf("init input dev: %s! \n",tscreen.name);
+		if((tsdevice = getenv("TSLIB_TSDEVICE")) != NULL )
+			ts = ts_open(tsdevice, _NO_BLK_MD_);
+		else 
+			ts = ts_open("/dev/input/event0", _NO_BLK_MD_);
+		if (!ts){
+			perror("ts_open");
+			return -1;
+		   }
+		if (ts_config(ts)) {
+			perror("ts_config");
+			return -1;
+		   }
+	tscreen.mthd.fd = ts_fd(ts);
 	return 0;
 #else
 	printf("init input dev: %s! \n",tscreen.name);
 	if((tsdevice = getenv("TSLIB_TSDEVICE")) != NULL )
-		ts = ts_open(tsdevice, _BLK_MD_);
+		ts = ts_open(tsdevice, _NO_BLK_MD_);
 	else 
-		ts = ts_open("/dev/input/event0", _BLK_MD_);
+		ts = ts_open("/dev/input/event0", _NO_BLK_MD_);
 	if (!ts){
 		perror("ts_open");
 		return -1;

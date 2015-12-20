@@ -31,7 +31,7 @@
 #define CONFIG_UTF16_LE_ENCODE
 #define CONFIG_UTF8_ENCODE
 /*config Input dev component */
-// #define CONFIG_STDIN_DEV
+#define CONFIG_STDIN_DEV
 #define CONFIG_TSC_DEV
 /*tscreen input method**/
 // #define CONFIG_TSC_INPUT_CLICK
@@ -41,8 +41,8 @@
 
 
 /*config Input Method */
-#define CONFIG_INPUT_QUERY
-// #define CONFIG_INPUT_SELECT
+// #define CONFIG_INPUT_QUERY
+#define CONFIG_INPUT_SELECT
 // #define CONFIG_INPUT_THREAD
 // #define CONFIG_INPUT_SLIP
 

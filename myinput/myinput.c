@@ -23,6 +23,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/select.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 
 /*******************************************************************************
@@ -30,6 +34,8 @@
 *                    
 *******************************************************************************/
 static struct input_dev *idev_h = NULL;
+static fd_set idev_fd_set;
+static int max_fd_val = -1;
 
 /*******************************************************************************
 * @global static func:     
@@ -162,6 +168,19 @@ int get_rt_input_ev(struct input_ev *pev)
 	return -1;			
 #endif 
 #ifdef CONFIG_INPUT_SELECT
+	int ret;
+	struct input_dev *tmp_dev = idev_h;
+	fd_set tmp_rd_set = idev_fd_set;
+	ret = select(max_fd_val, &tmp_rd_set, NULL, NULL, NULL);
+	if(ret > 0){
+		while(tmp_dev){
+			if(FD_ISSET(tmp_dev->mthd.fd, &tmp_rd_set))
+				if(tmp_dev->get_input_ev(pev) == 0)
+					return 0;
+			tmp_dev = tmp_dev->next;
+		}
+	}	
+	return -1;
 
 #endif 
 #if CONFIG_INPUT_THREAD 
@@ -209,7 +228,28 @@ int enable_input_dev_set(char *dev_ls[])
 	return 0;				
 #endif 
 #ifdef CONFIG_INPUT_SELECT
-				
+	int ret;
+	struct input_dev *tmp_dev = idev_h;
+	while(tmp_dev){
+		int i;
+		for(i = 0; dev_ls[i] != NULL; i++){
+			if(strcmp(tmp_dev->name, dev_ls[i]) == 0){
+				ret = tmp_dev->init_dev();
+				if(!ret){
+					FD_SET(tmp_dev->mthd.fd, &idev_fd_set);
+					if(max_fd_val < tmp_dev->mthd.fd)
+						max_fd_val = tmp_dev->mthd.fd;
+				}else{
+					printf("can't enable input_dev %s! \n",tmp_dev->name);
+					return -1;
+				}	
+			}
+			
+		}
+		tmp_dev = tmp_dev->next;
+	}
+	max_fd_val++;
+	return 0;				
 #endif 
 #if defined(CONFIG_INPUT_THREAD) || defined(CONFIG_INPUT_SLIP)
 
@@ -252,6 +292,24 @@ int disable_input_dev_set(char *dev_ls[])
 	return 0;			
 #endif 
 #ifdef CONFIG_INPUT_SELECT
+	int ret;
+	struct input_dev *tmp_dev = idev_h;
+	while(tmp_dev){
+		int i;
+		for(i = 0; dev_ls[i] != NULL; i++){
+			if(strcmp(tmp_dev->name, dev_ls[i]) == 0){
+				ret = tmp_dev->exit_dev();
+				if(ret){
+					printf("can't exit input_dev %s, it is busy! \n",tmp_dev->name);
+					return -1;
+				}
+					
+			}
+		}
+		tmp_dev = tmp_dev->next;
+	}
+	return 0;	
+
 				
 #endif 
 #if defined(CONFIG_INPUT_THREAD) || defined(CONFIG_INPUT_SLIP)
