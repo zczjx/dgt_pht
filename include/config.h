@@ -21,6 +21,7 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
+
 /*config display subsystem */
 #define CONFIG_FB
 // #define CONFIG_CRT
@@ -42,9 +43,9 @@
 
 /*config Input Method */
 // #define CONFIG_INPUT_QUERY
-#define CONFIG_INPUT_SELECT
-// #define CONFIG_INPUT_THREAD
-// #define CONFIG_INPUT_SLIP
+// #define CONFIG_INPUT_SELECT
+#define CONFIG_INPUT_THREAD
+
 
 /*config Font subsystem */
 #define CONFIG_ASCII_FONT

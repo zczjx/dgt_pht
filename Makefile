@@ -19,7 +19,7 @@ CFLAGS += -I $(shell pwd)/include
 CFLAGS += -I /mnt/sdb/SM210_DEV_ENV/toolchain/opt/FriendlyARM/toolschain/4.5.1/arm-none-linux-gnueabi/sys-root/usr/include/freetype2 
 # CFLAGS += -finput-charset=GBK -fexec-charset=UTF-8
 
-LDFLAGS := -lm -lfreetype -lts
+LDFLAGS := -lm -lfreetype -lts -lpthread
 
 export CFLAGS LDFLAGS
 

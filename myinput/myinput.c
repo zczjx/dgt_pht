@@ -23,7 +23,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/select.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -34,14 +33,27 @@
 *                    
 *******************************************************************************/
 static struct input_dev *idev_h = NULL;
+
+#ifdef  CONFIG_INPUT_SELECT
+#include <sys/select.h>
 static fd_set idev_fd_set;
 static int max_fd_val = -1;
+#endif 
+
+#ifdef CONFIG_INPUT_THREAD
+#include <pthread.h>
+static pthread_mutex_t input_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t  input_cond  = PTHREAD_COND_INITIALIZER;
+static struct input_ev sh_iev;
+#endif 
 
 /*******************************************************************************
 * @global static func:     
 *                    
 *******************************************************************************/
-
+#ifdef CONFIG_INPUT_THREAD
+static void * input_pthd_hld_func(void *arg);
+#endif 
 /*******************************************************************************
 * @extern function implement in sub module:     
 *                    
@@ -183,12 +195,15 @@ int get_rt_input_ev(struct input_ev *pev)
 	return -1;
 
 #endif 
-#if CONFIG_INPUT_THREAD 
+#ifdef CONFIG_INPUT_THREAD 
+	pthread_mutex_lock(&input_mutex);
+	pthread_cond_wait(&input_cond, &input_mutex);
+	memcpy(pev, &sh_iev, sizeof(struct input_ev));
+	pthread_mutex_unlock(&input_mutex);
+	return 0;
 
 #endif 
-#ifdef CONFIG_INPUT_SLIP
-
-#endif 
+ 
 
 
 
@@ -251,7 +266,27 @@ int enable_input_dev_set(char *dev_ls[])
 	max_fd_val++;
 	return 0;				
 #endif 
-#if defined(CONFIG_INPUT_THREAD) || defined(CONFIG_INPUT_SLIP)
+#ifdef CONFIG_INPUT_THREAD 
+	int ret;
+	struct input_dev *tmp_dev = idev_h;
+	while(tmp_dev){
+		int i;
+		for(i = 0; dev_ls[i] != NULL; i++){
+			if(strcmp(tmp_dev->name, dev_ls[i]) == 0){
+				ret = tmp_dev->init_dev();
+				if(!ret)
+					ret = pthread_create(&tmp_dev->mthd.tid,NULL,
+									input_pthd_hld_func,tmp_dev->get_input_ev);				
+				else{
+					printf("can't enable input_dev %s! \n",tmp_dev->name);
+					return -1;
+				}	
+			}
+			
+		}
+		tmp_dev = tmp_dev->next;
+	}
+	return ret;			
 
 #endif 
 
@@ -312,12 +347,61 @@ int disable_input_dev_set(char *dev_ls[])
 
 				
 #endif 
-#if defined(CONFIG_INPUT_THREAD) || defined(CONFIG_INPUT_SLIP)
-
-				
+#ifdef CONFIG_INPUT_THREAD
+/*need do pthread join and exit*/
+	int ret;
+	struct input_dev *tmp_dev = idev_h;
+	while(tmp_dev){
+		int i;
+		for(i = 0; dev_ls[i] != NULL; i++){
+			if(strcmp(tmp_dev->name, dev_ls[i]) == 0){
+				ret = tmp_dev->exit_dev();
+				if(ret){
+					printf("can't exit input_dev %s, it is busy! \n",tmp_dev->name);
+					return -1;
+				}
+					
+			}
+		}
+		tmp_dev = tmp_dev->next;
+	}
+	return 0;				
 #endif 
 
 
 }
+
+
+#ifdef CONFIG_INPUT_THREAD
+/*******************************************************************************
+* @function name: input_pthd_hld_func    
+*                
+* @brief:          
+*                
+* @param:        
+*                
+*                
+* @return:        
+*                
+* @comment:        
+*******************************************************************************/
+static void * input_pthd_hld_func(void *arg)
+{
+	struct input_ev iev;
+	int (*get_input_ev)(struct input_ev *pev);
+	get_input_ev = (int (*)(struct input_ev *)) arg;
+	while(1){
+		if(get_input_ev(&iev) == 0){
+		pthread_mutex_lock(&input_mutex);
+		memcpy(&sh_iev, &iev, sizeof(struct input_ev));
+		pthread_cond_signal(&input_cond);
+		pthread_mutex_unlock(&input_mutex);
+
+		}
+	}
+	return NULL;
+
+}
+#endif 
 
 

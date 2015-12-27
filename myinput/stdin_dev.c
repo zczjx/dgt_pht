@@ -143,7 +143,6 @@ int exit_stdin_dev(void)
 *******************************************************************************/
 int get_stdin_dev_ev(struct input_ev *pev)
 {
-#if	defined(CONFIG_INPUT_QUERY) || defined(CONFIG_INPUT_SELECT) 
 	struct timeval tm_out;
 	int ret;
 	fd_set stdfd;
@@ -180,10 +179,6 @@ int get_stdin_dev_ev(struct input_ev *pev)
 	}
 	else
 		return -1;	
-#elif defined(CONFIG_INPUT_THREAD) || defined(CONFIG_INPUT_SLIP)
-
-#endif 
-
 }
 
 

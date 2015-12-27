@@ -162,7 +162,6 @@ int exit_tscreen_dev(void)
 int get_tscreen_ev(struct input_ev *pev)
 {
 #ifdef CONFIG_TSC_INPUT_CLICK
-#if	defined(CONFIG_INPUT_QUERY) || defined(CONFIG_INPUT_SELECT) 
 	static int get_res_flag = 0;
 	static int g_xres;
 	static int g_yres;
@@ -199,16 +198,10 @@ int get_tscreen_ev(struct input_ev *pev)
 			pev->val = INPUT_VAL_UNKNOWN;
 		return 0;
 	}else
-		return -1;
-#elif defined(CONFIG_INPUT_THREAD) || defined(CONFIG_INPUT_SLIP)
-
-#endif 
-
-
+		return -1; 
 #endif 
 
 #ifdef CONFIG_TSC_INPUT_SLIDE
-#if	defined(CONFIG_INPUT_QUERY) || defined(CONFIG_INPUT_SELECT) 
 	int ret;
 	static int get_res_flag = 0;
 	static int g_xres;
@@ -262,11 +255,6 @@ int get_tscreen_ev(struct input_ev *pev)
 	}
 		
 		return -1;
-#elif defined(CONFIG_INPUT_THREAD) || defined(CONFIG_INPUT_SLIP)
-
-#endif 
-
-
 #endif 
 
 }

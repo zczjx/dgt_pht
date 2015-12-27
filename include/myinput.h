@@ -20,10 +20,11 @@
 *******************************************************************************/
 #ifndef _MYINPUT_H_
 #define _MYINPUT_H_
+
+#include "config.h"
+#include <pthread.h>
 #include <linux/types.h>
 #include <sys/time.h>
-#include "config.h"
-
 /*****macro for input_ev*****************************/
 #define INPUT_TYPE_STDIN        0
 #define INPUT_TYPE_TSC  		1
@@ -47,8 +48,8 @@ typedef union input_method{
 #ifdef CONFIG_INPUT_SELECT
 				int fd;
 #endif 
-#if defined(CONFIG_INPUT_THREAD) || defined(CONFIG_INPUT_SLIP)
-#include <pthread.h>
+#ifdef CONFIG_INPUT_THREAD
+
 				pthread_t tid;
 #endif 
 }input_method;
