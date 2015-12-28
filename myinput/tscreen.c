@@ -217,7 +217,7 @@ int get_tscreen_ev(struct input_ev *pev)
 	ret = get_dis_dev_res("fb", &g_xres, &g_yres);
 	printf("xres val is %d\n", g_xres);
 	printf("yres val is %d\n", g_yres);
-	r_slide = g_xres / 5;
+	r_slide = g_xres / 8;
 	l_slide = 0 - r_slide;
 	get_res_flag = 1;
 	}
