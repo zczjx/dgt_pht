@@ -18,7 +18,6 @@
 *    
 * @comment           
 *******************************************************************************/
-#include "config.h"
 #include "myinput.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -210,6 +209,39 @@ int get_rt_input_ev(struct input_ev *pev)
 }
 
 /*******************************************************************************
+* @function name: get_rt_raw_input_val    
+*                
+* @brief:          
+*                
+* @param:        
+*                
+*                
+* @return:        
+*                
+* @comment:        
+*******************************************************************************/
+int get_rt_raw_input_val(struct raw_input_val *pval)
+{
+#ifdef CONFIG_INPUT_SELECT
+	int ret;
+	struct input_dev *tmp_dev = idev_h;
+	fd_set tmp_rd_set = idev_fd_set;
+	ret = select(max_fd_val, &tmp_rd_set, NULL, NULL, NULL);
+	if(ret > 0){
+		while(tmp_dev){
+			if(FD_ISSET(tmp_dev->mthd.fd, &tmp_rd_set))
+				if(tmp_dev->get_input_raw_val(pval) == 0)
+					return 0;
+			tmp_dev = tmp_dev->next;
+		}
+	}
+#endif
+	return -1;
+
+}
+
+
+/*******************************************************************************
 * @function name: enable_input_dev_set    
 *                
 * @brief:          
@@ -266,6 +298,7 @@ int enable_input_dev_set(char *dev_ls[])
 	max_fd_val++;
 	return 0;				
 #endif 
+
 #ifdef CONFIG_INPUT_THREAD 
 	int ret;
 	struct input_dev *tmp_dev = idev_h;

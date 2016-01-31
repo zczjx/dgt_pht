@@ -18,7 +18,7 @@
 *    
 * @comment           
 *******************************************************************************/
-#include "config.h"
+#include "ui_config.h"
 #include "myinput.h"
 #include "display.h"
 #include <stdlib.h>
@@ -40,6 +40,9 @@
 static int init_tscreen_dev(void);
 static int exit_tscreen_dev(void);
 static int get_tscreen_ev(struct input_ev *pev);
+
+static int get_tsc_input_raw_val(struct raw_input_val *pval);
+
 static int is_out_of_time(struct timeval *pre_time, struct timeval *now_time,int dtime_ms);
 
 
@@ -49,10 +52,11 @@ static int is_out_of_time(struct timeval *pre_time, struct timeval *now_time,int
 *                    
 *******************************************************************************/
 static struct input_dev tscreen = {
-			.name 		= "tscreen",
-			.init_dev 	= init_tscreen_dev,
-			.exit_dev	= exit_tscreen_dev,
-			.get_input_ev = get_tscreen_ev,
+			.name 				= "tscreen",
+			.init_dev 			= init_tscreen_dev,
+			.exit_dev			= exit_tscreen_dev,
+			.get_input_ev 		= get_tscreen_ev,
+			.get_input_raw_val	= get_tsc_input_raw_val,
 };
 
 static struct tsdev *ts;
@@ -165,13 +169,14 @@ int get_tscreen_ev(struct input_ev *pev)
 	static int get_res_flag = 0;
 	static int g_xres;
 	static int g_yres;
+	static int g_bpp;
 	static int up_scr = 0;
 	static int down_scr = 0;
 	struct ts_sample samp;
 	int ret;
 	static struct timeval pre_tv;
 	if(!get_res_flag){
-	ret = get_dis_dev_res("fb", &g_xres, &g_yres);
+	ret = get_dis_dev_res("fb", &g_xres, &g_yres, &g_bpp);
 	printf("xres val is %d\n", g_xres);
 	printf("yres val is %d\n", g_yres);
 	up_scr = g_yres / 3;
@@ -214,7 +219,7 @@ int get_tscreen_ev(struct input_ev *pev)
 	struct ts_sample samp;
 	int ts_delta;
 	if(!get_res_flag){
-	ret = get_dis_dev_res("fb", &g_xres, &g_yres);
+	ret = get_dis_dev_res("fb", &g_xres, &g_yres, &g_bpp);
 	printf("xres val is %d\n", g_xres);
 	printf("yres val is %d\n", g_yres);
 	r_slide = g_xres / 8;
@@ -258,6 +263,34 @@ int get_tscreen_ev(struct input_ev *pev)
 #endif 
 
 }
+
+/*******************************************************************************
+* @function name: get_tsc_input_raw_val    
+*                
+* @brief:          
+*                
+* @param:        
+*                
+*                
+* @return:        
+*                
+* @comment:        
+*******************************************************************************/
+static int get_tsc_input_raw_val(struct raw_input_val *pval)
+{
+	int ret;
+	struct ts_sample samp;
+	if(!pval)
+		return -1;
+	ret = ts_read(ts, &samp, 1);
+	pval->type = INPUT_TYPE_TSC;
+	memcpy(&pval->tval, &samp.tv, sizeof(struct timeval));
+	pval->x = samp.x;
+	pval->y = samp.y;
+	pval->pressure = samp.pressure;
+	return 0;
+}
+
 
 /*******************************************************************************
 * @function name: is_out_of_time    

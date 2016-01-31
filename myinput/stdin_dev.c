@@ -19,7 +19,7 @@
 * @comment           
 *******************************************************************************/
 #include "myinput.h"
-#include "config.h"
+#include "ui_config.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

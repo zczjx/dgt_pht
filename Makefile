@@ -19,22 +19,25 @@ CFLAGS += -I $(shell pwd)/include
 CFLAGS += -I /mnt/sdb/SM210_DEV_ENV/toolchain/opt/FriendlyARM/toolschain/4.5.1/arm-none-linux-gnueabi/sys-root/usr/include/freetype2 
 # CFLAGS += -finput-charset=GBK -fexec-charset=UTF-8
 
-LDFLAGS := -lm -lfreetype -lts -lpthread
+LDFLAGS := -lm -lfreetype -lts -lpthread -ljpeg
 
 export CFLAGS LDFLAGS
 
 TOPDIR := $(shell pwd)
 export TOPDIR
 
-TARGET := app
+TARGET := dtp_app
 
 
 obj-y += main.o
-obj-y += book_engine/
+obj-y += app/
+obj-y += app_ui_server/
+obj-y += com_file_opr/
 obj-y += display/
-obj-y += encode/
-obj-y += font/
+obj-y += image_codec/
+obj-y += image_render/
 obj-y += myinput/
+obj-y += ui_frame/
 
 
 all : 

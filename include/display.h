@@ -40,11 +40,13 @@ typedef struct disp_dev_attr{
 typedef struct display_dev{
 	char *name;
 	struct disp_dev_attr attr;
-	int (*dev_init)(void);
+	__u8 *dfb_mem;
+	int (*dev_init)();
 	int (*clr_screen)(__u32 back_color);
 	int (*disp_pixel)(int px, int py, __u32 color);
 	struct display_dev *next;
 }display_dev;
+
 
 extern int load_display_md(void);
 extern int register_display_md(struct display_dev *pdev);
@@ -52,7 +54,7 @@ extern void print_disp_md_lst(void);
 extern int select_main_scr_dev(char *name); /*fb/crt */
 extern struct display_dev *get_disp_dev(char *name); 
 
-extern int get_dis_dev_res(const char *dev_name, int *xres, int *yres);
+extern int get_dis_dev_res(const char *dev_name, int *xres, int *yres, int *bpp);
 
 
 

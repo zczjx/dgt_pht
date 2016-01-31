@@ -134,7 +134,8 @@ static int fb_dev_init(void)
 	/* init the resolution and color bit infomation for high level display dev*/
 	fb_dev.attr.xres = var.xres;
 	fb_dev.attr.yres = var.yres;
-	fb_dev.attr.bpp	=  var.bits_per_pixel;
+	fb_dev.attr.bpp	 = var.bits_per_pixel;
+	fb_dev.dfb_mem  = g_lcd.fbmem;
 	printf("fb_dev.attr.bpp is:  %d \n", fb_dev.attr.bpp);
 	return 0;
 }

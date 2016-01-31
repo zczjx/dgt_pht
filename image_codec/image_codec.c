@@ -1,15 +1,15 @@
 /*******************************************************************************
-* Copyright (C), 2000-2015,  Electronic Technology Co., Ltd.
+* Copyright (C), 2000-2016,  Electronic Technology Co., Ltd.
 *                
-* @filename: display.c 
+* @filename: image_codec.c 
 *                
 * @author: Clarence.Chow <zhou_chenz@163.com> 
 *                
-* @version: v1.0.0
+* @version:
 *                
-* @date: 2015-12-4    
+* @date: 2016-1-10    
 *                
-* @brief: Implementation for display system in digital book            
+* @brief:          
 *                  
 *                  
 * @details:        
@@ -19,42 +19,36 @@
 * @comment           
 *******************************************************************************/
 #include "ui_config.h"
-#include "display.h"
-#include <stdlib.h>
-#include <stdio.h>
+#include "image_codec.h"
 #include <string.h>
 
 
-
-
+/*******************************************************************************
+* @global static variable:	   
+*					 
+*******************************************************************************/
+static struct image_codec *img_codec_h = NULL;
 
 /*******************************************************************************
-* @global static variable:     
-*                    
+* @global static func:	   
+*					 
 *******************************************************************************/
-static struct display_dev *disp_dev_h = NULL;
-
+	
 /*******************************************************************************
-* @global static func:     
-*                    
+* @extern function implement in sub module: 	
+*					 
 *******************************************************************************/
-
-/*******************************************************************************
-* @extern function implement in sub module:     
-*                    
-*******************************************************************************/
-#ifdef CONFIG_FB
-extern int load_fb_md(void);
+#ifdef CONFIG_JPEG_CODEC
+extern int load_jpeg_codec(void);
 #endif 
-
-#ifdef CONFIG_CRT
-extern int load_crt_md(void);
+	
+#ifdef CONFIG_BMP_CODEC
+extern int load_bmp_codec(void);
 #endif 
-
-
+	
 
 /*******************************************************************************
-* @function name: load_display_md    
+* @function name: load_image_codec    
 *                
 * @brief:          
 *                
@@ -65,23 +59,23 @@ extern int load_crt_md(void);
 *                
 * @comment:        
 *******************************************************************************/
-int load_display_md(void)
+
+int load_image_codec (void)
 {
 	int ret;
-#ifdef CONFIG_FB
-	ret = load_fb_md();
+#ifdef CONFIG_JPEG_CODEC
+	ret = load_jpeg_codec();
 #endif 
-
-#ifdef CONFIG_CRT
-	ret = load_crt_md();
+		
+#ifdef CONFIG_BMP_CODEC
+	ret = load_bmp_codec();
 #endif 
-
 	return ret;
 
 }
 
 /*******************************************************************************
-* @function name: register_display_md    
+* @function name: register_image_codec    
 *                
 * @brief:          
 *                
@@ -92,29 +86,28 @@ int load_display_md(void)
 *                
 * @comment:        
 *******************************************************************************/
-int register_display_md(struct display_dev *pdev)
+int register_image_codec (struct image_codec *pcodec)
 {
-	struct display_dev *tmp_dev;
-	if(!pdev)
+	struct image_codec *tmp_codec;
+	if(!pcodec)
 		return -1;
-	if(!disp_dev_h){ /*first item in this list*/
-		disp_dev_h = pdev;
-		disp_dev_h->next = NULL;
+	if(!img_codec_h){ /*first item in this list*/
+		img_codec_h = pcodec;
+		img_codec_h->next = NULL;
 		return 0;
 	}
 	else{
-		tmp_dev = disp_dev_h;
-		while(tmp_dev->next)
-			tmp_dev = tmp_dev->next;
-		tmp_dev->next = pdev;
-		pdev->next = NULL;
+		tmp_codec = img_codec_h;
+		while(tmp_codec->next)
+			tmp_codec = tmp_codec->next;
+		tmp_codec->next = pcodec;
+		pcodec->next = NULL;
 	}
 	return 0;
 
 }
-
 /*******************************************************************************
-* @function name: print_disp_md_lst    
+* @function name: print_image_codec_lst    
 *                
 * @brief:          
 *                
@@ -125,21 +118,19 @@ int register_display_md(struct display_dev *pdev)
 *                
 * @comment:        
 *******************************************************************************/
-void print_disp_md_lst(void)
+void print_image_codec_lst(void)
 {
-	struct display_dev *tmp_dev = disp_dev_h;
+	struct image_codec *tmp_codec = img_codec_h;
 	__u32 i = 0;
-	while(tmp_dev){
-	printf("the NO.%d module is %s\n", i++, tmp_dev->name);
-	tmp_dev = tmp_dev->next;
+	while(tmp_codec){
+	printf("the NO.%d codec is %s\n", i++, tmp_codec->codec_name);
+	tmp_codec = tmp_codec->next;
 	}
 
-
-	
 }
 
 /*******************************************************************************
-* @function name: select_main_scr_dev    
+* @function name: get_image_codec_by_name    
 *                
 * @brief:          
 *                
@@ -150,18 +141,18 @@ void print_disp_md_lst(void)
 *                
 * @comment:        
 *******************************************************************************/
-int select_main_scr_dev(char *name)
+struct image_codec * get_image_codec_by_name(char *name)
 {
-	struct display_dev *tmp_dev;
-	tmp_dev = get_disp_dev(name);
-	if(!tmp_dev)
-		return -1;
-	tmp_dev->dev_init();
-	return 0;
-
+	struct image_codec *tmp_codec = img_codec_h;
+	while (tmp_codec){
+		if (strcmp(tmp_codec->codec_name, name) == 0)
+			return tmp_codec;
+		tmp_codec = tmp_codec->next;
+	}
+	return NULL;
 }
 /*******************************************************************************
-* @function name: get_disp_dev    
+* @function name: get_fmt_match_image_codec    
 *                
 * @brief:          
 *                
@@ -172,44 +163,15 @@ int select_main_scr_dev(char *name)
 *                
 * @comment:        
 *******************************************************************************/
-struct display_dev *get_disp_dev(char *name)
+struct image_codec * get_fmt_match_image_codec(struct common_file *pfile)
 {
-	struct display_dev *tmp_dev = disp_dev_h;
-	if(!name)
-		return NULL;
-	while(tmp_dev){
-		if(strcmp(tmp_dev->name, name) == 0)
-			return tmp_dev;
-		tmp_dev = tmp_dev->next;
-
+	struct image_codec *tmp_codec = img_codec_h;
+	while (tmp_codec){
+		if (tmp_codec->is_support_fmt(pfile))
+			return tmp_codec;
+		tmp_codec = tmp_codec->next;
 	}
 	return NULL;
 
 }
-
-
-/*******************************************************************************
-* @function name: get_dis_dev_res    
-*                
-* @brief:          
-*                
-* @param:        
-*                
-*                
-* @return:        
-*                
-* @comment:        
-*******************************************************************************/
-int get_dis_dev_res(const char *dev_name, int *xres, int *yres, int *bpp)
-{
-	struct display_dev *dis_dev = NULL;
-	dis_dev = get_disp_dev(dev_name);
-	if(!dis_dev)
-		return -1;
-	*xres   = (int)dis_dev->attr.xres;
-	*yres   = (int)dis_dev->attr.yres;
-	*bpp	= (int)dis_dev->attr.bpp;
-	return 0;
-}
-
 
