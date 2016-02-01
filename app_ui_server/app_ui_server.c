@@ -55,12 +55,20 @@ int load_init_ui_sys(struct ui_server *server, int argc, char **argv)
 	int ret;
 	char *dev_ls[] = DEFAULT_DEV_LIST;
 	ret = load_display_md();
-	ret = select_main_scr_dev("fb"); 
+	ret = select_main_scr_dev("fb");
+	printf("select_main_scr_dev ret is : %d!\n",ret);
+	printf("bf alloc disp buf mem!\n");
 	ret = alloc_disp_buf_mem(CONFIG_ACC_MEM_NR);
+	printf("alloc_disp_buf_mem ret is : %d!\n",ret);
+	printf("bf load my input sys!\n");
 	ret = load_input_md();
+	printf("bf enable input dev!\n");
 	ret = enable_input_dev_set(dev_ls);
+	printf("bf load image codec!\n");
 	ret = load_image_codec ();
+	printf("bf init server!\n");
 	ret = server->init(server, argc, argv);
+	printf("server->init ret is : %d!\n",ret);
 	return ret;
 }
 	
@@ -79,6 +87,7 @@ int load_init_ui_sys(struct ui_server *server, int argc, char **argv)
 int start_ui_server(struct ui_server *server, int argc, char **argv)
 {
 	int ret;
+	printf("bf create server run pth!\n");
 	pthread_create(&server->ser_tid, NULL,
 					server->run, server);
 	
@@ -122,6 +131,7 @@ int activate_ui(struct ui_server *server, char *act_ui_name)
 		if(strcmp(tmp_ui->name, act_ui_name) == 0){
 			if(!server->act_ui){
 				/*first startup ui*/
+				printf("bf 1st active ui!\n");
 				if(pipe(p_rd_fd) < 0)
 					return -1;
 				server->pfd[SERVER_PFD_RD] = p_rd_fd[0];
@@ -131,6 +141,8 @@ int activate_ui(struct ui_server *server, char *act_ui_name)
 				pthread_create(&server->ui_tid, NULL,
 								tmp_ui->run,tmp_ui);
 				server->act_ui = tmp_ui;
+				printf("ui name is %s\n", server->act_ui->name);
+				printf("ui_tid: %d, ser_tid: %d\n", server->ui_tid,server->ser_tid);
 				return 0;
 			}else{	
 				close(server->pfd[SERVER_PFD_RD]);

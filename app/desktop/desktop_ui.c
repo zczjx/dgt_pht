@@ -118,7 +118,9 @@ static void  dsktp_run(struct m_ui_obj *self)
 {
 	int ret;
 	while(1){
+		printf("bf dsktp show static ui!\n");
 		ret =  show_static_ui_view(self->ui_view, self->hash_id, NULL);
+		printf("dsktp show ui ret is %d\n", ret);
 	}
 	return 0;
 

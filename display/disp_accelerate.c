@@ -77,7 +77,7 @@ int alloc_disp_buf_mem(int num)
 	}
 	dis_dev = get_disp_dev("fb");
 	/* 指向framebuffer */
-	
+	printf("bf alloc dev fb to disp mem!\n");
 	new_buf->mem = dis_dev->dfb_mem;
 	new_buf->src_bpp = src_bpp;
 	new_buf->id  = 0;
@@ -97,6 +97,7 @@ int alloc_disp_buf_mem(int num)
 	/*
 	 * 分配用于缓存的VideoMem
 	 */
+	printf("bf alloc normal disp mem!\n");
 	for (i = 0; i < num; i++){
 		/* 分配T_VideoMem结构体本身和"跟framebuffer同样大小的缓存" */
 		new_buf = (struct disp_buf_mem *)malloc(sizeof(struct disp_buf_mem) + buf_sz);
@@ -104,6 +105,7 @@ int alloc_disp_buf_mem(int num)
 		perror("not enough mem to alloc! \n");
 		return -1;
 		}
+		printf("bf set 1st normal disp mem!\n");
 		new_buf->mem = (__u8 *)(new_buf + 1);
 		new_buf->id  = -1;
 		new_buf->buf_use_flag = COMMON_BUF;

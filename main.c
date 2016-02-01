@@ -23,6 +23,7 @@
 #include "app_ui_server.h"
 #include "config_app.h"
 #include <unistd.h>
+#include <stdio.h>
 
 /*******************************************************************************
 * @global func:	   
@@ -93,8 +94,12 @@ static int dtp_server_init(struct ui_server *self,int argc, char **argv)
 *******************************************************************************/
 static void  dtp_server_run(struct ui_server *self)
 {
+	int ret;
+	printf("bf active ui!\n");
 	while(1){
-		activate_ui(self, "desktop");
+		
+		ret = activate_ui(self, "desktop");	
+		printf("active ui ret is %d\n", ret);
 		sleep(10);
 	}
 
@@ -103,8 +108,9 @@ static void  dtp_server_run(struct ui_server *self)
 
 int main(int argc, char *argv[])
 {
-	
+	printf("bf load sys!\n");
 	load_init_ui_sys(&dtp_server, argc, argv);
+	printf("bf start server!\n");
 	start_ui_server(&dtp_server, argc, argv);
 	return 0;
 }

@@ -142,18 +142,21 @@ int gen_static_ui_view(struct view *pv)
 	struct image_obj tmp_org_img; 
 	struct image_obj *tmp_zoom_img;
 	struct blk_layout *img_set;
+	char full_pathname[128];
 	int ret;
 	if(!pv->dyn_canvas.dis_mem)
 		return -1;
 	
 	/* 描画数据: VideoMem中的页面数据未生成的情况下才执行下面操作 */
 	if (pv->dyn_canvas.dis_mem->dat_stat != BD_GENERATED){
+		printf("bf clear canvas full gen static ui!\n");
 		clear_full_image_obj(&pv->dyn_canvas, CONFIG_COLOR_CANVAS, 1);
 		if(pv->icon_rg){
 			img_set = pv->icon_rg->blk_set;
+			memcpy(full_pathname, CONFIG_ICON_DIR, strlen(CONFIG_ICON_DIR) + 1);
 			while (img_set->blk_name){
 				float wid_scale, heig_scale;
-				ret = create_image_obj(strcat(CONFIG_ICON_DIR, img_set->blk_name), &tmp_org_img, 
+				ret = create_image_obj(strcat(full_pathname, img_set->blk_name), &tmp_org_img, 
 									   TYP_TRUE_IMAGE, 0, NULL);
 				if (ret){
 					perror("can't create tmp image!\n");
@@ -183,10 +186,13 @@ int gen_static_ui_view(struct view *pv)
 
 		}
 		if(pv->widget_rg){
+			printf("bf gen widget in gen static ui!\n");
 			img_set = pv->widget_rg->blk_set;
+			memcpy(full_pathname, CONFIG_WIDGET_DIR, strlen(CONFIG_WIDGET_DIR) + 1);
 			while (img_set->blk_name){
 				float wid_scale, heig_scale;
-				ret = create_image_obj(strcat(CONFIG_WIDGET_DIR, img_set->blk_name), &tmp_org_img, 
+				printf("bf gen widget create img obj in gen static ui!\n");
+				ret = create_image_obj(strcat(full_pathname, img_set->blk_name), &tmp_org_img, 
 									   TYP_TRUE_IMAGE, 0, NULL);
 				if (ret){
 					perror("can't create tmp image!\n");
@@ -197,12 +203,14 @@ int gen_static_ui_view(struct view *pv)
 							 / tmp_org_img.img->pix_of_col;
 				wid_scale  = (img_set->bot_x_right- img_set->top_x_left + 1) 
 							/ tmp_org_img.img->pix_of_row;
+				printf("bf gen widget gen zoom img in gen static ui!\n");
  				tmp_zoom_img = gen_zoom_image(&tmp_org_img, wid_scale, heig_scale);
 				if(!tmp_zoom_img){
 					perror("can't zoom tmp image!\n");
                 	destroy_image_obj(tmp_zoom_img);
 					return -1;
 				}
+				printf("bf gen widget merge img in gen static ui!\n");
 				ret = merge_image_to_large(tmp_zoom_img, &pv->dyn_canvas, 
 									 img_set->top_x_left, img_set->top_y_left);
  				destroy_image_obj(&tmp_org_img);
@@ -257,6 +265,7 @@ int gen_static_ui_view(struct view *pv)
 int show_static_ui_view(struct view *pv, int ui_id, void *arg)
 {
 	int ret;
+	printf("dsktp show static ui create img obj!\n");
 	ret = create_image_obj(NULL, &pv->dyn_canvas, 
 							TYP_VIRT_IMAGE, 1, ui_id);
 	if(ret){
@@ -265,12 +274,12 @@ int show_static_ui_view(struct view *pv, int ui_id, void *arg)
 
 	}
 	/* 2. do layout process */
-
+	printf("dsktp show static ui layout static ui!\n");
 	if (!pv->layout_flg)
 		pv->layout_static_ui(pv);
-	
+	printf("dsktp show static ui gen static ui!\n");
 	ret = gen_static_ui_view(pv);
-	
+	printf("dsktp show static ui gen static ui!\n");
 	if(pv->render_static_ui_hook)
 		ret = pv->render_static_ui_hook(pv, arg);
 

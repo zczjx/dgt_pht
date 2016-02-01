@@ -80,7 +80,6 @@ static int is_jpeg_fmt(struct common_file *pfile)
 	//struct jpeg_error_mgr tJErr;   
 	struct jpg_err jerr;
     int ret;
-
     fseek(pfile->fhld, 0, SEEK_SET);
 
 	// 分配和初始化一个decompression结构体

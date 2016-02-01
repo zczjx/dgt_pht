@@ -50,6 +50,10 @@
 #define CONFIG_INPUT_SELECT
 
 
+/*config display fb*/
+
+#define CONFIG_FB
+
 #endif /* ifndef _UI_CONFIG_H_.2016-1-26 обнГ 9:13:00 zcz */
 
 

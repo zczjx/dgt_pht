@@ -218,10 +218,12 @@ struct image_obj *gen_zoom_image(struct image_obj *orgin, float wid_scale, float
     src_x_tlb = malloc(sizeof(__u32) * dst_pix_of_ln);
 	dst_img	  = malloc(1 + sizeof(struct image_obj) + (
 					   pix_bytes * dst_pix_of_ln * dst_pix_of_col ));
-    if ((!src_x_tlb) || (!dst_img)){
+	dst_img->img  = malloc(sizeof(struct image_dsc));
+    if ((!src_x_tlb) || (!dst_img) || (!dst_img->img)){
         perror("no mem to zoom!\n");
         return NULL;
     }
+	printf("bf zoom tmp set val!\n");
 	dst_img->path_name = "tmp_img_obj";
 	dst_img->type = orgin->type;
 	dst_img->img->pix_of_row = dst_pix_of_ln;
@@ -232,10 +234,11 @@ struct image_obj *gen_zoom_image(struct image_obj *orgin, float wid_scale, float
 	dst_img->img->total_bytes  = dst_img->img->bytes_of_row * dst_img->img->pix_of_col;
 	dst_img->img->pix_dat = (__u8 *)(dst_img + 1);
 	dst_img->dis_mem = NULL;
+	printf("bf src_x_tlb set val!\n");
     for (xpos = 0; xpos < dst_pix_of_ln; xpos++)//Éú³É±í pdwSrcXTable
     	src_x_tlb[xpos] = (__u32)(xpos * 1 / wid_scale);
 
-
+	printf("bf tmp zoom img cpy val!\n");
     for (ypos = 0; ypos < dst_pix_of_col; ypos++){			
         src_y = (__u32) (ypos * 1 / heig_scale);
 		dst = dst_img->img->pix_dat + ypos * dst_img->img->bytes_of_row;

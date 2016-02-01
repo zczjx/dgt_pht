@@ -69,7 +69,6 @@ int map_file_ro(struct common_file *fobj)
 		perror("null pointer error! \n");
 		return -1;
 	}
-	
 	fp = fopen(fobj->pathname, "r+");
 	if(!fp){
 		perror("can't open this file! \n");
@@ -90,7 +89,6 @@ int map_file_ro(struct common_file *fobj)
 		return -1;
 	}
 	fobj->fmem = mem;
-	
 	return 0;
 
 }
