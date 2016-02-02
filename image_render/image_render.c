@@ -265,6 +265,7 @@ struct image_obj *gen_zoom_image(struct image_obj *orgin, float wid_scale, float
 *******************************************************************************/
 int merge_image_to_large(struct image_obj *sml, struct image_obj *larg, int x, int y)
 {
+	/*bug to be resoleve*/
 	int i;
 	__u8 *src;
 	__u8 *dst;

@@ -56,19 +56,11 @@ int load_init_ui_sys(struct ui_server *server, int argc, char **argv)
 	char *dev_ls[] = DEFAULT_DEV_LIST;
 	ret = load_display_md();
 	ret = select_main_scr_dev("fb");
-	printf("select_main_scr_dev ret is : %d!\n",ret);
-	printf("bf alloc disp buf mem!\n");
 	ret = alloc_disp_buf_mem(CONFIG_ACC_MEM_NR);
-	printf("alloc_disp_buf_mem ret is : %d!\n",ret);
-	printf("bf load my input sys!\n");
 	ret = load_input_md();
-	printf("bf enable input dev!\n");
 	ret = enable_input_dev_set(dev_ls);
-	printf("bf load image codec!\n");
 	ret = load_image_codec ();
-	printf("bf init server!\n");
 	ret = server->init(server, argc, argv);
-	printf("server->init ret is : %d!\n",ret);
 	return ret;
 }
 	
@@ -87,7 +79,6 @@ int load_init_ui_sys(struct ui_server *server, int argc, char **argv)
 int start_ui_server(struct ui_server *server, int argc, char **argv)
 {
 	int ret;
-	printf("bf create server run pth!\n");
 	pthread_create(&server->ser_tid, NULL,
 					server->run, server);
 	
@@ -145,6 +136,7 @@ int activate_ui(struct ui_server *server, char *act_ui_name)
 				printf("ui_tid: %d, ser_tid: %d\n", server->ui_tid,server->ser_tid);
 				return 0;
 			}else{	
+				printf("bf normal active ui!\n");
 				close(server->pfd[SERVER_PFD_RD]);
 				close(server->act_ui->pfd[UI_PFD_WR]);
 				server->act_ui->state = INACTIVE;

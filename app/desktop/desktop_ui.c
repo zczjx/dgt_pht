@@ -118,7 +118,7 @@ static void  dsktp_run(struct m_ui_obj *self)
 {
 	int ret;
 	while(1){
-		printf("bf dsktp show static ui!\n");
+		sleep(2);
 		ret =  show_static_ui_view(self->ui_view, self->hash_id, NULL);
 		printf("dsktp show ui ret is %d\n", ret);
 	}
@@ -207,18 +207,23 @@ static void  dp_layout_static_ui(struct view *self)
 	blk_set[0].top_y_left  = iStartY;
 	blk_set[0].bot_y_right = blk_set[0].top_y_left + iHeight - 1;
 	blk_set[0].top_x_left  = (xres - iWidth * 2) / 2;
-	blk_set[0].bot_y_right = blk_set[0].top_x_left + iWidth * 2 - 1;
+	blk_set[0].bot_x_right = blk_set[0].top_x_left + iWidth * 2 - 1;
 	iTmpTotalBytes = (blk_set[0].bot_y_right - blk_set[0].top_x_left + 1) 
 				   * (blk_set[0].bot_y_right - blk_set[0].top_y_left + 1) 
 				   * src_bpp / 8;
 	if (self->window_var_attr.max_bytes < iTmpTotalBytes)
 		self->window_var_attr.max_bytes = iTmpTotalBytes;
-
+	printf("dp y_left: %d \n", blk_set[0].top_y_left);
+	printf("dp y_right: %d \n", blk_set[0].bot_y_right);
+	printf("dp x_left: %d \n", blk_set[0].top_x_left);
+	printf("dp x_right: %d \n", blk_set[0].bot_x_right);			
+	printf("dp yres: %d \n", yres);
+	printf("dp xres: %d \n", xres);
 
 	blk_set[1].top_y_left  = blk_set[0].bot_y_right + iHeight / 2 + 1;
 	blk_set[1].bot_y_right = blk_set[1].top_y_left + iHeight - 1;
 	blk_set[1].top_x_left  = (xres - iWidth * 2) / 2;
-	blk_set[1].bot_y_right = blk_set[1].top_x_left + iWidth * 2 - 1;
+	blk_set[1].bot_x_right = blk_set[1].top_x_left + iWidth * 2 - 1;
 	iTmpTotalBytes = (blk_set[1].bot_y_right - blk_set[1].top_x_left + 1) 
 				   * (blk_set[1].bot_y_right - blk_set[1].top_y_left + 1) 
 				   * src_bpp / 8;
@@ -229,7 +234,7 @@ static void  dp_layout_static_ui(struct view *self)
 	blk_set[2].top_y_left  = blk_set[1].bot_y_right + iHeight / 2 + 1;
 	blk_set[2].bot_y_right = blk_set[2].top_y_left + iHeight - 1;
 	blk_set[2].top_x_left  = (xres - iWidth * 2) / 2;
-	blk_set[2].bot_y_right = blk_set[2].top_x_left + iWidth * 2 - 1;
+	blk_set[2].bot_x_right = blk_set[2].top_x_left + iWidth * 2 - 1;
 	iTmpTotalBytes = (blk_set[2].bot_y_right - blk_set[2].top_x_left + 1) 
 				   * (blk_set[2].bot_y_right - blk_set[2].top_y_left + 1) 
 				   * src_bpp / 8;
