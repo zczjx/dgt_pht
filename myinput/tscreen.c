@@ -213,11 +213,12 @@ int get_tscreen_ev(struct input_ev *pev)
 	static struct ts_sample rls_samp;
 	struct ts_sample samp;
 	int ts_delta;
+	//printf("have use tscreen\n");
 	if(!get_res_flag){
 	ret = get_dis_dev_res("fb", &g_xres, &g_yres);
 	printf("xres val is %d\n", g_xres);
 	printf("yres val is %d\n", g_yres);
-	r_slide = g_xres / 8;
+	r_slide = g_xres / 10;
 	l_slide = 0 - r_slide;
 	get_res_flag = 1;
 	}
