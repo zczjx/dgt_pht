@@ -43,8 +43,8 @@
 
 /*config Input Method */
 // #define CONFIG_INPUT_QUERY
-// #define CONFIG_INPUT_SELECT
-#define CONFIG_INPUT_THREAD
+#define CONFIG_INPUT_SELECT
+//#define CONFIG_INPUT_THREAD
 
 
 /*config Font subsystem */

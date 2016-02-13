@@ -199,7 +199,7 @@ int set_book_disp_attr(struct book_dsc *pdsc, const char *devname,
 #define FONT_HZK   		1
 #define FONT_FREETYPE   2
 #define FONT_UNKOWN   	0xFF
-int set_book_text_attr(struct book_dsc *pdsc, const char *font_name,
+int set_book_text_attr(struct book_dsc *pdsc, char *font_name,
 							__u32 font_size )
 {
 	__u8 font_nr;

@@ -26,6 +26,7 @@
 #include "font.h"
 #include "myinput.h"
 #include <linux/types.h>
+#include <string.h>
 
 typedef struct page_dsc{
 	__u32 pg_nr;
@@ -77,7 +78,7 @@ extern int init_book_load_sys(struct book_dsc *pdsc, const char *book_path);
 extern int set_book_disp_attr(struct book_dsc *pdsc ,const char *devname,
 										__u32 back_color, __u32 font_color);
 
-extern int set_book_text_attr(struct book_dsc *pdsc ,const char *font_name,
+extern int set_book_text_attr(struct book_dsc *pdsc , char *font_name,
 									__u32 font_size );
 
 
