@@ -163,7 +163,7 @@ int init_book_load_sys(struct book_dsc *pdsc, const char *book_path)
 			if back_color || font_color == 0 stand for default color config
 *******************************************************************************/
 int set_book_disp_attr(struct book_dsc *pdsc, const char *devname,
-										__u32 back_color, __u32 font_color)
+			__u32 back_color, __u32 font_color)
 {
 	int ret;
 	pdsc->disp_attr.dev = get_disp_dev(devname);

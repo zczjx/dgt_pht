@@ -76,10 +76,10 @@ extern int init_book_load_sys(struct book_dsc *pdsc, const char *book_path);
 
 /*if back_color || font_color == 0 stand for default color config */
 extern int set_book_disp_attr(struct book_dsc *pdsc ,const char *devname,
-										__u32 back_color, __u32 font_color);
+				__u32 back_color, __u32 font_color);
 
 extern int set_book_text_attr(struct book_dsc *pdsc , char *font_name,
-									__u32 font_size );
+				__u32 font_size );
 
 
 #endif /* ifndef _BOOK_ENGINE_H_.2015-12-12 обнГ 12:46:38 zcz */
