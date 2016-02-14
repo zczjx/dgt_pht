@@ -77,7 +77,9 @@ int alloc_disp_buf_mem(int num)
 	}
 	dis_dev = get_disp_dev("fb");
 	/* Ö¸Ïòframebuffer */
-	new_buf->mem = dis_dev->dfb_mem;
+	new_buf->mem  = dis_dev->dfb_mem;
+	new_buf->xres = xres;
+	new_buf->yres = yres;
 	new_buf->src_bpp = src_bpp;
 	new_buf->id  = 0;
 	new_buf->buf_use_flag = DISP_DEV;
@@ -105,6 +107,9 @@ int alloc_disp_buf_mem(int num)
 		}
 		new_buf->mem = (__u8 *)(new_buf + 1);
 		new_buf->id  = -1;
+		new_buf->src_bpp = src_bpp;
+		new_buf->xres = xres;
+		new_buf->yres = yres;
 		new_buf->buf_use_flag = COMMON_BUF;
 		new_buf->mem_stat	  = MEM_FREE;
 		new_buf->dat_stat	  = BD_BLANK;

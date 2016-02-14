@@ -235,7 +235,8 @@ struct image_obj *gen_zoom_image(struct image_obj *orgin, float wid_scale, float
 	dst_img->img->pix_dat = (__u8 *)(dst_img + 1);
 	dst_img->dis_mem = NULL;
 	printf("bf src_x_tlb set val!\n");
-    for (xpos = 0; xpos < dst_pix_of_ln; xpos++)//Éú³É±í pdwSrcXTable
+	//memset(dst_img->img->pix_dat, 0x00 ,dst_img->img->total_bytes);
+    for (xpos = 0; xpos < dst_pix_of_ln; xpos++)  //pdwSrcXTable
     	src_x_tlb[xpos] = (__u32)(xpos * 1 / wid_scale);
 
 	printf("bf tmp zoom img cpy val!\n");
@@ -266,24 +267,25 @@ struct image_obj *gen_zoom_image(struct image_obj *orgin, float wid_scale, float
 int merge_image_to_large(struct image_obj *sml, struct image_obj *larg, int x, int y)
 {
 	/*bug to be resoleve*/
-	int i;
+	int i, j;
 	__u8 *src;
 	__u8 *dst;
 	int larg_bytes_of_row;
 	int larg_bpp;
 	__u32 larg_pix_of_ln;
 	__u32 larg_pix_of_col;
-	if((!larg) || (!sml))
+	
+	if((!larg) || (!sml)){
+		printf("null in merge!\n");
 		return -1;
+		}
 
 	if(larg->dis_mem){
 		/*canvas*/
-		int xres,yres,bpp;
-		get_dis_dev_res("fb", &xres, &yres, &bpp);
 		larg_bytes_of_row = larg->dis_mem->bytes_of_fb_row;
 		larg_bpp		  = larg->dis_mem->src_bpp;
-		larg_pix_of_ln	  = xres;
-		larg_pix_of_col	  = yres;
+		larg_pix_of_ln	  = larg->dis_mem->xres;
+		larg_pix_of_col	  = larg->dis_mem->yres;
 		dst = larg->dis_mem->mem;
 	}else{
 		/*normal img*/
@@ -292,20 +294,62 @@ int merge_image_to_large(struct image_obj *sml, struct image_obj *larg, int x, i
 		larg_pix_of_ln	  = larg->img->pix_of_row;
 		larg_pix_of_col	  = larg->img->pix_of_col;
 		dst = larg->img->pix_dat;
+		if(sml->img->img_bpp != larg_bpp)
+			return -1;
 	}
-
 	
+	printf("large bpp is %d!\n", larg_bpp);
+	printf("sml bpp is %d!\n", sml->img->img_bpp);
 	if ((sml->img->pix_of_row > larg_pix_of_ln)  ||
-		(sml->img->pix_of_col > larg_pix_of_col) ||
-		(sml->img->img_bpp != larg_bpp))
+		(sml->img->pix_of_col > larg_pix_of_col)){
+			printf("largbpp err!\n");
 			return -1;
 
+		}
+	
 	src = sml->img->pix_dat;
 	dst = dst + y * larg_bytes_of_row + x * larg_bpp / 8;
-	for (i = 0; i < sml->img->pix_of_col; i++){
-		memcpy(dst, src, sml->img->pix_of_row);
-		src += sml->img->bytes_of_row;
-		dst += larg_bytes_of_row;
+
+	if(larg->dis_mem){
+		/*canvas*/
+		__u8 *tmp_src;
+		__u8 *tmp_dst;
+		switch(larg_bpp){
+			case 32:
+				for (i = 0; i < sml->img->pix_of_col; i++){
+					tmp_src = src; 
+					tmp_dst = dst;	
+					for(j = 0; j < sml->img->pix_of_row; j++){
+						tmp_dst[0] = tmp_src[0];
+						tmp_dst[1] = tmp_src[1];
+						tmp_dst[2] = tmp_src[2];
+						tmp_dst[3] = 0x00;
+						tmp_src += 3;
+						tmp_dst += 4;
+					}
+					src += sml->img->bytes_of_row;
+					dst += larg_bytes_of_row;
+				}
+				break;
+			case 24:
+				for (i = 0; i < sml->img->pix_of_col; i++){
+					memcpy(dst, src, sml->img->pix_of_row);
+					src += sml->img->bytes_of_row;
+					dst += larg_bytes_of_row;
+				}
+				break;
+
+			default:
+				return -1;
+		}
+	
+	}
+	else{
+		for (i = 0; i < sml->img->pix_of_col; i++){
+			memcpy(dst, src, sml->img->pix_of_row);
+			src += sml->img->bytes_of_row;
+			dst += larg_bytes_of_row;
+		}
 	}
 	return 0;
 }

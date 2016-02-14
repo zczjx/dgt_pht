@@ -52,6 +52,8 @@ typedef struct disp_buf_mem{
 	enum BUF_USE_FLG buf_use_flag;            /* 1: 这个VideoMem是显示设备的显存; 0: 只是一个普通缓存 */
 	enum DIS_MEM_STAT mem_stat; /* 这个VideoMem的状态 */
 	enum BUF_DAT_STAT dat_stat;           /* VideoMem中内存里图片的状态 */
+	int xres;
+	int yres;
 	int buf_size;
 	int bytes_of_fb_row;
 	int src_bpp;

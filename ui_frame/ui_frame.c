@@ -140,10 +140,10 @@ int register_ui_obj(struct m_ui_obj *ui_hash[], int hash_len, struct m_ui_obj *p
 int gen_static_ui_view(struct view *pv)
 {
 	struct image_obj  tmp_org_img; 
-	struct image_obj *tmp_zoom_img;
+	struct image_obj *tmp_zoom_img = NULL;
 	struct blk_layout *img_set;
 	char full_pathname[128];
-	int ret;
+	int i,ret;
 	if(!pv->dyn_canvas.dis_mem)
 		return -1;
 	
@@ -175,6 +175,7 @@ int gen_static_ui_view(struct view *pv)
 				}
 
             /* 把缩放后的图标数据,合并到VideoMem的指定区域 */
+			
 				ret = merge_image_to_large(tmp_zoom_img, &pv->dyn_canvas, 
 									 img_set->top_x_left, img_set->top_y_left);
             /* 释放原始的图标象素数据 */
@@ -196,18 +197,10 @@ int gen_static_ui_view(struct view *pv)
                 	destroy_image_obj(&tmp_org_img);
 					return -1;
 				}
-				printf("y_left: %d \n", img_set->top_y_left);
-				printf("y_right: %d \n", img_set->bot_y_right);
-				printf("x_left: %d \n", img_set->top_x_left);
-				printf("x_right: %d \n", img_set->bot_x_right);			
-				printf("yres: %d \n", tmp_org_img.img->pix_of_col);
-				printf("xres: %d \n", tmp_org_img.img->pix_of_row);
-
-				
 				heig_scale = ((float) img_set->bot_y_right - img_set->top_y_left + 1) 
 							 / ((float) tmp_org_img.img->pix_of_col);
 				wid_scale  = ((float) img_set->bot_x_right- img_set->top_x_left + 1) 
-							/ ((float) tmp_org_img.img->pix_of_row);
+							 / ((float) tmp_org_img.img->pix_of_row);
 				printf("h_scale:%f, w_scale:%f \n", heig_scale, wid_scale);
  				tmp_zoom_img = gen_zoom_image(&tmp_org_img, wid_scale, heig_scale);
 				if(!tmp_zoom_img){
@@ -215,6 +208,7 @@ int gen_static_ui_view(struct view *pv)
                 	destroy_image_obj(tmp_zoom_img);
 					return -1;
 				}
+				
 				ret = merge_image_to_large(tmp_zoom_img, &pv->dyn_canvas, 
 									 img_set->top_x_left, img_set->top_y_left);
 				printf("merge img ret :%d\n", ret);
