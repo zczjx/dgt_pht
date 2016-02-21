@@ -39,7 +39,7 @@ typedef struct jpg_err{
 *					 
 *******************************************************************************/
 static int is_jpeg_fmt(struct common_file *pfile); 
-static int get_jpeg_pix_dat(struct common_file *pfile, struct image_dsc *img);
+static int get_jpeg_pix_dat(struct common_file *pfile, struct image_dsc *fmt_img);
 static int free_jpeg_pix_dat(struct image_dsc *img);  
 static int cpy_one_jpeg_row(int pix_of_row, int img_bpp, int scr_bpp, __u8 *src, __u8 *dst);
 static void jpeg_err_exit(j_common_ptr com_info);
@@ -117,7 +117,7 @@ static int is_jpeg_fmt(struct common_file *pfile)
 *                
 * @comment:        
 *******************************************************************************/
-static int get_jpeg_pix_dat(struct common_file *pfile, struct image_dsc *img)
+static int get_jpeg_pix_dat(struct common_file *pfile, struct image_dsc *fmt_img)
 {
 	struct jpeg_decompress_struct jinfo;
     int ret;
@@ -139,8 +139,8 @@ static int get_jpeg_pix_dat(struct common_file *pfile, struct image_dsc *img)
         jpeg_destroy_decompress(&jinfo);
         if (row_buf)
             free(row_buf);
-        if (img->pix_dat)
-            free(img->pix_dat);
+        if (fmt_img->pix_dat)
+            free(fmt_img->pix_dat);
 		return -1;
 	}
 
@@ -162,29 +162,28 @@ static int get_jpeg_pix_dat(struct common_file *pfile, struct image_dsc *img)
 		return -1;
     }
 
-	img->pix_of_row   = jinfo.output_width;
-	img->pix_of_col   = jinfo.output_height;
-	//ptPixelDatas->iBpp    = iBpp;
-	img->bytes_of_row = img->pix_of_row * img->scr_bpp / 8;
-    img->total_bytes  = img->bytes_of_row * img->pix_of_col;
-	img->pix_dat	  = (__u8 *) malloc(img->total_bytes);
-	if (!img->pix_dat){
+	fmt_img->pix_of_row   = jinfo.output_width;
+	fmt_img->pix_of_col   = jinfo.output_height;
+	fmt_img->bytes_of_row = fmt_img->pix_of_row * fmt_img->scr_bpp / 8;
+    fmt_img->total_bytes  = fmt_img->bytes_of_row * fmt_img->pix_of_col;
+	fmt_img->pix_dat	  = (__u8 *) malloc(fmt_img->total_bytes);
+	if (!fmt_img->pix_dat){
 		perror("error: have no mem to malloc! \n");
 		return -1;
 	}
 
 
-    dst_buf = img->pix_dat;
+    dst_buf = fmt_img->pix_dat;
 
 	// 循环调用jpeg_read_scanlines来一行一行地获得解压的数据
 	while (jinfo.output_scanline < jinfo.output_height) {
         /* 得到一行数据,里面的颜色格式为0xRR, 0xGG, 0xBB */
 		(void) jpeg_read_scanlines(&jinfo, &row_buf, 1);
 		// 转到ptPixelDatas去
-		cpy_one_jpeg_row(img->pix_of_row, 24,
-						 img->scr_bpp, row_buf, 
+		cpy_one_jpeg_row(fmt_img->pix_of_row, 24,
+						 fmt_img->scr_bpp, row_buf, 
 						 dst_buf);
-		dst_buf += img->bytes_of_row;
+		dst_buf += fmt_img->bytes_of_row;
 	}
 	free(row_buf);
 	jpeg_finish_decompress(&jinfo);

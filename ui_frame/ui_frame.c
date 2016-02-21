@@ -211,6 +211,7 @@ int gen_static_ui_view(struct view *pv)
 				printf("img pix of row :%d\n", tmp_org_img.img->pix_of_row);
 				ret = merge_image_to_large(tmp_zoom_img, &pv->dyn_canvas, 
 									 img_set->top_x_left, img_set->top_y_left);
+				
 				printf("merge img ret :%d\n", ret);
  				destroy_image_obj(&tmp_org_img);
  				img_set++;

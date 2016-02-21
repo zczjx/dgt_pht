@@ -56,7 +56,7 @@ typedef struct bmp_info_head { /* bmih */
 *					 
 *******************************************************************************/
 static int is_bmp_fmt(struct common_file *pfile); 
-static int get_bmp_pix_dat(struct common_file *pfile, struct image_dsc *img);
+static int get_bmp_pix_dat(struct common_file *pfile, struct image_dsc *fmt_img);
 static int free_bmp_pix_dat(struct image_dsc *img);  
 static int cpy_one_bmp_row(int pix_of_row, int img_bpp, int scr_bpp, __u8 *src, __u8 *dst);
 
@@ -108,14 +108,14 @@ static int is_bmp_fmt(struct common_file *pfile)
 *                
 * @comment:        
 *******************************************************************************/
-static int get_bmp_pix_dat(struct common_file *pfile, struct image_dsc *img)
+static int get_bmp_pix_dat(struct common_file *pfile, struct image_dsc *fmt_img)
 {
 	bmp_file_head *bmp_fhead;
 	bmp_info_head *bmp_ihead;
     __u8 *fmem;
 
-	int img_row_bytes;
-	int img_row_align_bytes;
+	int org_img_row_bytes;
+	int org_img_row_align_bytes;
 	__u8 *bmp_src;
 	__u8 *bmp_dst;
 	int y;
@@ -129,38 +129,37 @@ static int get_bmp_pix_dat(struct common_file *pfile, struct image_dsc *img)
 	bmp_fhead = (struct bmp_file_head *) fmem ;
 	bmp_ihead = (struct bmp_info_head *)(fmem  + sizeof(struct bmp_file_head));
 
-	img->pix_of_row = bmp_ihead->biWidth;
-	img->pix_of_col = bmp_ihead->biHeight;
-	img->img_bpp	= bmp_ihead->biBitCount;
+	fmt_img->pix_of_row = bmp_ihead->biWidth;
+	fmt_img->pix_of_col = bmp_ihead->biHeight;
+	fmt_img->img_bpp	= bmp_ihead->biBitCount;
 
-	if (img->img_bpp != 24){
+	if (fmt_img->img_bpp != 24){
 		perror("error: only support 24 bit bmp! \n");
 		return -1;
 	}
 
-	img->bytes_of_row = img->pix_of_row * img->img_bpp / 8;
-	img->total_bytes  = img->bytes_of_row * img->pix_of_col;
-	img->pix_dat	  = (__u8 *) malloc(img->total_bytes);
-	if (!img->pix_dat){
+	fmt_img->bytes_of_row = fmt_img->pix_of_row * fmt_img->scr_bpp / 8;
+	fmt_img->total_bytes  = fmt_img->bytes_of_row * fmt_img->pix_of_col;
+	fmt_img->pix_dat	  = (__u8 *) malloc(fmt_img->total_bytes);
+	if (!fmt_img->pix_dat){
 		perror("error: have no mem to malloc! \n");
 		return -1;
 	}
 
-	img_row_bytes = img->pix_of_row  * img->img_bpp / 8;
-	img_row_align_bytes = (img_row_bytes + 3) & ~0x3;   /* 向4取整 */
+	org_img_row_bytes = fmt_img->pix_of_row  * fmt_img->img_bpp / 8;
+	org_img_row_align_bytes = (org_img_row_bytes + 3) & ~0x3;   /* 向4取整 */
 		
 	bmp_src = fmem + bmp_fhead->bfOffBits;
-	bmp_src = bmp_src + (img->pix_of_col - 1) * img_row_align_bytes; /*dat start frm last line*/
+	bmp_src = bmp_src + (fmt_img->pix_of_col - 1) * org_img_row_align_bytes; /*dat start frm last line*/
 
-	bmp_dst = img->pix_dat;
+	bmp_dst = fmt_img->pix_dat;
 	
-	for (y = 0; y < img->pix_of_col; y++){		
-		//memcpy(pucDest, pucSrc, iLineWidthReal);
-		cpy_one_bmp_row(img->pix_of_row, img->img_bpp, 
-						img->img_bpp, bmp_src, bmp_dst);
+	for (y = 0; y < fmt_img->pix_of_col; y++){		
+		cpy_one_bmp_row(fmt_img->pix_of_row, fmt_img->img_bpp, 
+						fmt_img->scr_bpp, bmp_src, bmp_dst);
 		
-		bmp_src	-= img_row_align_bytes;
-		bmp_dst	+= img->bytes_of_row ;
+		bmp_src	-= org_img_row_align_bytes;
+		bmp_dst	+= fmt_img->bytes_of_row ;
 	}
 	return 0;	
 
@@ -219,6 +218,7 @@ static int cpy_one_bmp_row(int pix_of_row, int img_bpp, int scr_bpp, __u8 *src, 
 
 	if (scr_bpp == 24)
 		memcpy(dst, src, pix_of_row * 3);
+	
 	else{
 		for (i = 0; i < pix_of_row; i++){
 			blue  = src[pos++];
