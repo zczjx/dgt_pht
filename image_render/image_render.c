@@ -319,13 +319,15 @@ int merge_image_to_large(struct image_obj *sml, struct image_obj *larg, int x, i
 				for (i = 0; i < sml->img->pix_of_col; i++){
 					tmp_src = src; 
 					tmp_dst = dst;	
-					for(j = 0; j < sml->img->pix_of_row; j++){
+					//printf("sml pix_of_row : %d \n", sml->img->pix_of_row);
+					for(j = 0; j <= sml->img->pix_of_row; j++){
 						tmp_dst[0] = tmp_src[0];
 						tmp_dst[1] = tmp_src[1];
 						tmp_dst[2] = tmp_src[2];
 						tmp_dst[3] = 0x00;
 						tmp_src += 3;
 						tmp_dst += 4;
+						//printf("j is : %d \n", j);
 					}
 					src += sml->img->bytes_of_row;
 					dst += larg_bytes_of_row;

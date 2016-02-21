@@ -138,7 +138,7 @@ static int get_bmp_pix_dat(struct common_file *pfile, struct image_dsc *img)
 		return -1;
 	}
 
-	img->bytes_of_row = img->pix_of_row * img->scr_bpp / 8;
+	img->bytes_of_row = img->pix_of_row * img->img_bpp / 8;
 	img->total_bytes  = img->bytes_of_row * img->pix_of_col;
 	img->pix_dat	  = (__u8 *) malloc(img->total_bytes);
 	if (!img->pix_dat){
@@ -157,7 +157,7 @@ static int get_bmp_pix_dat(struct common_file *pfile, struct image_dsc *img)
 	for (y = 0; y < img->pix_of_col; y++){		
 		//memcpy(pucDest, pucSrc, iLineWidthReal);
 		cpy_one_bmp_row(img->pix_of_row, img->img_bpp, 
-						img->scr_bpp, bmp_src, bmp_dst);
+						img->img_bpp, bmp_src, bmp_dst);
 		
 		bmp_src	-= img_row_align_bytes;
 		bmp_dst	+= img->bytes_of_row ;
