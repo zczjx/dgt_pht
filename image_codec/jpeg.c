@@ -179,7 +179,6 @@ static int get_jpeg_pix_dat(struct common_file *pfile, struct image_dsc *fmt_img
 	while (jinfo.output_scanline < jinfo.output_height) {
         /* 得到一行数据,里面的颜色格式为0xRR, 0xGG, 0xBB */
 		(void) jpeg_read_scanlines(&jinfo, &row_buf, 1);
-		// 转到ptPixelDatas去
 		cpy_one_jpeg_row(fmt_img->pix_of_row, 24,
 						 fmt_img->scr_bpp, row_buf, 
 						 dst_buf);

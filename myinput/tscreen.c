@@ -279,16 +279,32 @@ int get_tscreen_ev(struct input_ev *pev)
 static int get_tsc_input_raw_val(struct raw_input_val *pval)
 {
 	int ret;
+	static int get_res_flag = 0;
+	static int g_xres;
+	static int g_yres;
+	static int g_bpp;
 	struct ts_sample samp;
+	static struct timeval pre_tv;
 	if(!pval)
 		return -1;
+	if(!get_res_flag){
+		ret = get_dis_dev_res("fb", &g_xres, &g_yres, &g_bpp);
+		get_res_flag = 1;
+	}
 	ret = ts_read(ts, &samp, 1);
-	pval->type = INPUT_TYPE_TSC;
+	if (ret < 0) 
+		return -1;	
+	if((samp.x <= 0) || (samp.x > g_xres))
+		return -1;  /*discard val*/
+	if((samp.y <= 0) || (samp.y > g_yres))
+			return -1;  /*discard val*/
 	memcpy(&pval->tval, &samp.tv, sizeof(struct timeval));
+	pval->type = INPUT_TYPE_TSC;
 	pval->x = samp.x;
 	pval->y = samp.y;
 	pval->pressure = samp.pressure;
 	return 0;
+
 }
 
 

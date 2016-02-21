@@ -281,7 +281,6 @@ int show_static_ui_view(struct view *pv, int ui_id, void *arg)
 	printf("bf flush\n");
 	/* 3. 刷到设备上去 */
 	ret = flush_canvas_display(&pv->dyn_canvas);
-	printf("flush ret is %d\n", ret);
 
 	/* 4. 解放显存 */
 	destroy_image_obj(&pv->dyn_canvas);

@@ -76,7 +76,7 @@ typedef enum msg_src{
 
 typedef struct input_msg{
 	enum msg_src src;
-	int  val;
+	int  key_val;
 }input_msg;
 
 typedef struct c_input{

@@ -35,7 +35,9 @@ static int   dp_prepare_view_dat(void);
 static int 	 dsktp_get_input_msg(struct c_input *self, struct input_msg *imsg);
 static int   dsktp_snd_rqst(int pfd[2], void *p_request);
 static void  dsktp_run(struct m_ui_obj *self);
-static int   dsktp_ui_init(struct m_ui_obj *self);	
+static int   dsktp_ui_init(struct m_ui_obj *self);
+static int   do_input_ev_dsktp(struct m_ui_obj *self,  struct input_msg *imsg);	
+
 
 /*******************************************************************************
 * @global static variable:	   
@@ -117,10 +119,13 @@ static int   dsktp_snd_rqst(int pfd[2], void *p_request)
 static void  dsktp_run(struct m_ui_obj *self)
 {
 	int ret;
+	struct input_msg imsg;
+	ret =	show_static_ui_view(self->ui_view, self->hash_id, NULL);
 	while(1){
-		sleep(2);
-		ret =  show_static_ui_view(self->ui_view, self->hash_id, NULL);
-		printf("dsktp show ui ret is %d\n", ret);
+		//sleep(2);
+		// ret =	show_static_ui_view(self->ui_view, self->hash_id, NULL);
+		ret =	self->ui_input->get_input_msg(self->ui_input, &imsg);
+		ret =	do_input_ev_dsktp(self,&imsg);
 	}
 	return 0;
 
@@ -159,6 +164,15 @@ static int   dsktp_ui_init(struct m_ui_obj *self)
 static int 	dsktp_get_input_msg(struct c_input *self, struct input_msg *imsg)
 {
 	/*ok*/
+	int ret;
+	ret = get_ui_raw_input(self);
+	if(ret)
+		return -1;
+	
+	printf("x: %d, y: %d, pre: %d \n",
+			self->raw_ival.x,
+			self->raw_ival.y,
+			self->raw_ival.pressure);
 	return 0;
 
 
@@ -213,12 +227,6 @@ static void  dp_layout_static_ui(struct view *self)
 				   * src_bpp / 8;
 	if (self->window_var_attr.max_bytes < iTmpTotalBytes)
 		self->window_var_attr.max_bytes = iTmpTotalBytes;
-	printf("dp y_left: %d \n", blk_set[0].top_y_left);
-	printf("dp y_right: %d \n", blk_set[0].bot_y_right);
-	printf("dp x_left: %d \n", blk_set[0].top_x_left);
-	printf("dp x_right: %d \n", blk_set[0].bot_x_right);			
-	printf("dp yres: %d \n", yres);
-	printf("dp xres: %d \n", xres);
 
 	blk_set[1].top_y_left  = blk_set[0].bot_y_right + iHeight / 2 + 1;
 	blk_set[1].bot_y_right = blk_set[1].top_y_left + iHeight - 1;
@@ -281,6 +289,26 @@ static void  dp_show_ui_blk_animation(struct blk_layout *pblk, char *anim_name)
 	}
 	
 }
+
+/*******************************************************************************
+* @function name: do_input_ev_dsktp    
+*                
+* @brief:          
+*                
+* @param:        
+*                
+*                
+* @return:        
+*                
+* @comment:        
+*******************************************************************************/
+static int do_input_ev_dsktp(struct m_ui_obj *self,  struct input_msg *imsg)
+{
+
+	return 0;
+
+}
+
 
 /*******************************************************************************
 * @function name: dp_prepare_view_dat    

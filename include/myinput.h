@@ -41,7 +41,7 @@ typedef struct raw_input_val{
 	int x;     /* X/Y座标 */
 	int y;
 	int key;   /* 按键值 */
-	int pressure; /* 压力值 */
+	unsigned int pressure; /* 压力值 */
 }raw_input_val;
 
 
@@ -84,7 +84,7 @@ extern int get_rt_raw_input_val(struct raw_input_val *pval);
 
 
 /*en and disable dev*/
-#define DEFAULT_DEV_LIST {"touchscreen",NULL}
+#define DEFAULT_DEV_LIST {"tscreen",NULL}
 extern int enable_input_dev_set(char *dev_ls[]);
 extern int disable_input_dev_set(char *dev_ls[]); 
 
